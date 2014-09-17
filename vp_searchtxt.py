@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from simple_vp import *
 import socket, select
 import sys
