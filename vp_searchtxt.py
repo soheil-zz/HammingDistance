@@ -36,7 +36,7 @@ def main(file_name):
     f = open(file_name)
     f.next()
     aset = [int(w) for w in f]
-    rad = 30
+    rad = 15
     # distance = levenshtein
     distance = hamming
 
