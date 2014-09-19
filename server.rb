@@ -1,3 +1,4 @@
+#!/usr/bin/ruby
 require 'socket'
 
 server = TCPServer.open(8880)
