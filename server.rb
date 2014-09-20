@@ -6,7 +6,7 @@ loop do
   Thread.start(server.accept) do |client|
     begin
       request = client.gets
-      raise 'No request' if request.blank?
+      raise 'No request' if !request
       request = request.split(',')
       raise 'Incomplete request' if request.size != 3
 
