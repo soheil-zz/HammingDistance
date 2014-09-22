@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 require 'socket'
 
-server = TCPServer.open(8880)
+server = TCPServer.open(11600)
 loop do
   Thread.start(server.accept) do |client|
     begin
