@@ -2,6 +2,7 @@
 require 'socket'
 
 server = TCPServer.open(11600)
+lines = File.foreach('/tmp/data')
 loop do
   Thread.start(server.accept) do |client|
     begin
@@ -15,7 +16,7 @@ loop do
       how_many_needed = request[2].to_i
 
       count = 0
-      File.foreach('/tmp/data') do |line|
+      lines do |line|
         # calculate hamming distance
         if (line.to_i ^ phash).to_s(2).count('1') < threshold
           client.puts(line.to_i)
