@@ -23,8 +23,7 @@ int main () {
   cout << "loading file..." << endl;
   string line;
   ifstream myfile ("/tmp/data");
-  if (myfile.is_open())
-  {
+  if (myfile.is_open()) {
     int cnt = 0, bad_cnt = 0, bit_count = 0;
     uint64_t inp = 10213218608714346503;
     uint64_t shifted_inp = inp >> 1;
@@ -51,14 +50,13 @@ int main () {
     int sockfd, newsockfd, portno, clilen;
     char buffer[256];
     struct sockaddr_in serv_addr, cli_addr;
-    int  n;
+    int n;
 
     /* First call to socket() function */
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
-    {
-        perror("ERROR opening socket");
-        exit(1);
+    if (sockfd < 0) {
+      perror("ERROR opening socket");
+      exit(1);
     }
     /* Initialize socket structure */
     bzero((char *) &serv_addr, sizeof(serv_addr));
@@ -69,63 +67,57 @@ int main () {
 
     /* Now bind the host address using bind() call.*/
     if (bind(sockfd, (struct sockaddr *) &serv_addr,
-                          sizeof(serv_addr)) < 0)
+          sizeof(serv_addr)) < 0)
     {
-         perror("ERROR on binding");
-         exit(1);
+      perror("ERROR on binding");
+      exit(1);
     }
-    /* Now start listening for the clients, here 
-     * process will go in sleep mode and will wait 
+    /* Now start listening for the clients, here
+     * process will go in sleep mode and will wait
      * for the incoming connection
      */
-    listen(sockfd,5);
+    listen(sockfd, 5);
     clilen = sizeof(cli_addr);
-    while (1)
-    {
-        newsockfd = accept(sockfd,
-                (struct sockaddr *) &cli_addr, (socklen_t *)&clilen);
-        if (newsockfd < 0)
-        {
-            perror("ERROR on accept");
-            exit(1);
-        }
-        /* Create child process */
-        int pid = fork();
-        if (pid < 0)
-        {
-            perror("ERROR on fork");
-            exit(1);
-        }
-        if (pid == 0)
-        {
-            /* This is the client process */
-            close(sockfd);
+    while (1) {
+      newsockfd = accept(sockfd,
+          (struct sockaddr *) &cli_addr, (socklen_t *)&clilen);
+      if (newsockfd < 0) {
+        perror("ERROR on accept");
+        exit(1);
+      }
+      /* Create child process */
+      int pid = fork();
+      if (pid < 0) {
+        perror("ERROR on fork");
+        exit(1);
+      }
+      if (pid == 0) {
+        /* This is the client process */
+        close(sockfd);
 
-            // newsockfd
-            // do I have a off-by-one error? big freaking deal, so what? wanna fight about it? @soheil
-            for(int j = 0; j < total_count; j++) {
-            //while (--lines) {
-              try {
-                num = lines[j];
-                //num = *lines;
-                x = inp ^ num;
+        // newsockfd
+        // do I have a off-by-one error? big freaking deal, so what? wanna fight about it? @soheil
+        for (int j = 0; j < total_count; j++) {
+          //while (--lines) {
+          try {
+            num = lines[j];
+            //num = *lines;
+            x = inp ^ num;
 
-                x -= (x >> 1) & m1;             //put count of each 2 bits into those 2 bits
-                x = (x & m2) + ((x >> 2) & m2); //put count of each 4 bits into those 4 bits 
-                x = (x + (x >> 4)) & m4;        //put count of each 8 bits into those 8 bits 
-                bit_count = (x * h01)>>56;  //returns left 8 bits of x + (x<<8) + (x<<16) + (x<<24) + ... 
+            x -= (x >> 1) & m1;             //put count of each 2 bits into those 2 bits
+            x = (x & m2) + ((x >> 2) & m2); //put count of each 4 bits into those 4 bits
+            x = (x + (x >> 4)) & m4;        //put count of each 8 bits into those 8 bits
+            bit_count = (x * h01)>>56;  //returns left 8 bits of x + (x<<8) + (x<<16) + (x<<24) + ...
 
-                if (bit_count < 5) cout << j << ":" << num << endl;
-              } catch (...) {
+            if (bit_count < 5) cout << j << ":" << num << endl;
+          } catch (...) {
 
-              }
-            }
-            exit(0);
+          }
         }
-        else
-        {
-            close(newsockfd);
-        }
+        exit(0);
+      } else {
+        close(newsockfd);
+      }
     } /* end of while */
 
   }
