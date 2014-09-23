@@ -1,7 +1,7 @@
 Hamming Distance Server in C++
 ==============================
 
-This Hamming Distance server can be used to find matching values in a corpse of data based on hamming distance closeness.
+This Hamming Distance server can be used to find matching values in a corpus of data based on hamming distance closeness.
 
 
 Compile and Run
@@ -23,7 +23,7 @@ Make a TCP connection to above port on the client. The input format is
 VALUE_TO_FIND_HAMMING_DISTANCE_FOR,THRESHOLD,COUNT
 ```
 
-* `VALUE_TO_FIND_HAMMING_DISTANCE_FOR` is just the value that you'd like to search the corpse of data for.
+* `VALUE_TO_FIND_HAMMING_DISTANCE_FOR` is just the value that you'd like to search the corpus of data for.
 * `THRESHOLD` acceptable match threshold value, values with this many or less differing bits are returned.
 * `COUNT` server will only return this many matches, there is no ordering.
 
