@@ -1,8 +1,6 @@
 /*
-* compile and run:
-* g++ -std=c++11 -o a server.cpp; time ./a
-*
 * requires gcc 4.8 or above
+* make && ./server PORT DATA_FILE
 */
 
 #include <iostream>
@@ -17,7 +15,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-using namespace std;
 
 const uint64_t m1  = 0x5555555555555555; //binary: 0101...
 const uint64_t m2  = 0x3333333333333333; //binary: 00110011..
@@ -28,34 +25,35 @@ const uint64_t m32 = 0x00000000ffffffff; //binary: 32 zeros, 32 ones
 const uint64_t hff = 0xffffffffffffffff; //binary: all ones
 const uint64_t h01 = 0x0101010101010101; //the sum of 256 to the power of 0,1,2,3...
 
-int main () {
-  cout << "loading file..." << endl;
-  string line;
-  ifstream myfile ("/tmp/data");
+int main (int argc, char* argv[]) {
+  std::string file = "/tmp/data";
+  int port = 11600;
+  if (argc >= 2) port = atoi(argv[1]);
+  if (argc == 3) file = argv[2];
+  std::cout << "loading file: " << file << "..." << std::endl;
+  std::string line;
+  std::ifstream myfile (file);
   if (myfile.is_open()) {
     int cnt = 0, bad_cnt = 0, bit_count = 0;
     uint64_t inp = 0;
     uint64_t num, x;
-    int i = 20000000, total_count = 0;
-    //uint64_t *lines = new uint64_t[i];
-    vector<uint64_t> lines(20000000);
+    int i = 200000000, total_count = 0;
+    std::vector<uint64_t> lines(i);
     while ( getline (myfile, line) ) {
       try {
         num = stoul(line, NULL, 0);
-        //*lines = num;
-        //lines++;
         lines[total_count] = num;
         total_count++;
       } catch (...) {
         bad_cnt++;
       }
     }
-    cout << "total count: " << total_count << endl;
-    cout << "bad count: " << bad_cnt << endl;
+    std::cout << "total count: " << total_count << std::endl;
+    std::cout << "bad count: " << bad_cnt << std::endl;
     myfile.close();
 
 
-    int sockfd, newsockfd, portno, clilen;
+    int sockfd, newsockfd, clilen;
     char buffer[256];
     struct sockaddr_in serv_addr, cli_addr;
     int n;
@@ -68,10 +66,9 @@ int main () {
     }
     /* Initialize socket structure */
     bzero((char *) &serv_addr, sizeof(serv_addr));
-    portno = 11600;
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
-    serv_addr.sin_port = htons(portno);
+    serv_addr.sin_port = htons(port);
 
     /* Now bind the host address using bind() call.*/
     if (bind(sockfd, (struct sockaddr *) &serv_addr,
@@ -86,6 +83,7 @@ int main () {
      */
     listen(sockfd, 5);
     clilen = sizeof(cli_addr);
+    std::cout << "listening on port: " << port << std::endl;
     while (1) {
       newsockfd = accept(sockfd,
           (struct sockaddr *) &cli_addr, (socklen_t *)&clilen);
@@ -113,13 +111,13 @@ int main () {
           perror("ERROR reading from socket");
           exit(1);
         }
-        // string string_buffer = buffer;
-        istringstream ss(buffer);
-        string token;
+        // std::string string_buffer = buffer;
+        std::istringstream ss(buffer);
+        std::string token;
         int pieces = 0, threshold = 0, how_many_needed = 0;
         while(getline(ss, token, ',')) {
           pieces++;
-          cout << "||" << token << endl;
+          std::cout << "||" << token << std::endl;
           if (pieces == 1) inp = stoul(token, NULL, 0);
           if (pieces == 2) threshold = stoul(token, NULL, 0);
           if (pieces == 3) how_many_needed = stoul(token, NULL, 0);
@@ -147,9 +145,9 @@ int main () {
 
             if (bit_count < threshold) {
               found_count++;
-              cout << j << ":" << num << endl;
+              std::cout << j << ":" << num << std::endl;
               char result[256];
-              sprintf(result, "%llu", num);
+              sprintf(result, "%llu\n", num);
               n = write(newsockfd, &result, strlen(result));
               if (n < 0) {
                 perror("ERROR writing to socket");
@@ -169,6 +167,6 @@ int main () {
 
   }
 
-  else cout << "Unable to open file";
+  else std::cout << "Unable to open file";
   return 0;
 }
