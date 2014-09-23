@@ -9,6 +9,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <sstream>
+#include <cstring>
 #include <stdio.h>
 #include <strings.h>
 #include <unistd.h>
@@ -32,8 +34,7 @@ int main () {
   ifstream myfile ("/tmp/data");
   if (myfile.is_open()) {
     int cnt = 0, bad_cnt = 0, bit_count = 0;
-    uint64_t inp = 10213218608714346503;
-    uint64_t shifted_inp = inp >> 1;
+    uint64_t inp = 0;
     uint64_t num, x;
     int i = 20000000, total_count = 0;
     //uint64_t *lines = new uint64_t[i];
@@ -102,8 +103,36 @@ int main () {
         /* This is the client process */
         close(sockfd);
 
+        int n;
+        char buffer[256];
+
+        bzero(buffer, 256);
+
+        n = read(newsockfd, buffer, 255);
+        if (n < 0) {
+          perror("ERROR reading from socket");
+          exit(1);
+        }
+        // string string_buffer = buffer;
+        istringstream ss(buffer);
+        string token;
+        int pieces = 0, threshold = 0, how_many_needed = 0;
+        while(getline(ss, token, ',')) {
+          pieces++;
+          cout << "||" << token << endl;
+          if (pieces == 1) inp = stoul(token, NULL, 0);
+          if (pieces == 2) threshold = stoul(token, NULL, 0);
+          if (pieces == 3) how_many_needed = stoul(token, NULL, 0);
+        }
+        printf("Here IS the message: %s\n", buffer);
+        if (pieces != 3) {
+          perror("Didn't receive all the pieces");
+          exit(1);
+        }
+
         // newsockfd
         // do I have a off-by-one error? big freaking deal, so what? wanna fight about it? @soheil
+        int found_count = 0;
         for (int j = 0; j < total_count; j++) {
           //while (--lines) {
           try {
@@ -116,7 +145,18 @@ int main () {
             x = (x + (x >> 4)) & m4;        //put count of each 8 bits into those 8 bits
             bit_count = (x * h01)>>56;      //returns left 8 bits of x + (x<<8) + (x<<16) + (x<<24) + ...
 
-            if (bit_count < 5) cout << j << ":" << num << endl;
+            if (bit_count < threshold) {
+              found_count++;
+              cout << j << ":" << num << endl;
+              char result[256];
+              sprintf(result, "%llu", num);
+              n = write(newsockfd, &result, strlen(result));
+              if (n < 0) {
+                perror("ERROR writing to socket");
+                exit(1);
+              }
+              if (found_count >= how_many_needed) break;
+            }
           } catch (...) {
 
           }
