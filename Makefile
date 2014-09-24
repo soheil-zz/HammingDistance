@@ -7,6 +7,6 @@ build: $(FILES)
 	$(CC) $(FLAGS) -o $(OUT_EXE) $(FILES)
 
 clean:
-	rm -f *.o core
+	rm -f *.o $(OUT_EXE)
 
 rebuild: clean build
