@@ -167,6 +167,6 @@ int main (int argc, char* argv[]) {
 
   }
 
-  else std::cout << "Unable to open file";
+  else std::cout << "Unable to open file" << std::endl;
   return 0;
 }
