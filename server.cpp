@@ -9,6 +9,8 @@
 #include <vector>
 #include <sstream>
 #include <cstring>
+#include <sys/wait.h>
+#include <signal.h>
 #include <stdio.h>
 #include <strings.h>
 #include <unistd.h>
