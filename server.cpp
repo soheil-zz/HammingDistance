@@ -91,6 +91,8 @@ int main (int argc, char* argv[]) {
         perror("ERROR on accept");
         exit(1);
       }
+      // don't care about childs deaths, kernel can kill them so they don't become zombies
+      signal(SIGCHLD, SIG_IGN);
       /* Create child process */
       int pid = fork();
       if (pid < 0) {
@@ -128,14 +130,11 @@ int main (int argc, char* argv[]) {
           exit(1);
         }
 
-        // newsockfd
         // do I have a off-by-one error? big freaking deal, so what? wanna fight about it? @soheil
         int found_count = 0;
         for (int j = 0; j < total_count; j++) {
-          //while (--lines) {
           try {
             num = lines[j];
-            //num = *lines;
             x = inp ^ num;
 
             x -= (x >> 1) & m1;             //put count of each 2 bits into those 2 bits
