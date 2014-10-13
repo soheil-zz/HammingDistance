@@ -1,4 +1,4 @@
-CC = g++
+CC = gcc
 FILES = server.cpp
 OUT_EXE = server
 FLAGS = -std=c++11
