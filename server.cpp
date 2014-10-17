@@ -35,25 +35,26 @@ int main (int argc, char* argv[]) {
   std::cout << "loading file: " << file << "..." << std::endl;
   std::string line;
   std::ifstream myfile (file);
+  std::cout << "loading file: done" << std::endl;
+
   if (myfile.is_open()) {
     int cnt = 0, bad_cnt = 0, bit_count = 0;
     uint64_t inp = 0;
     uint64_t num, x;
-    int i = 200000000, total_count = 0;
-    std::vector<uint64_t> lines(i);
-    while ( getline (myfile, line) ) {
-      try {
-        num = stoul(line, NULL, 0);
-        lines[total_count] = num;
-        total_count++;
-      } catch (...) {
-        bad_cnt++;
-      }
+
+    int N = 200000000, total_count = 0;
+    uint64_t *lines = (uint64_t *) malloc(sizeof(uint64_t) * N);
+    uint64_t *pl = lines;
+    printf("start");
+    while( getline (myfile, line) ) {
+      uint64_t num;
+      sscanf(line.c_str(), "%llu", pl++);
+      total_count++;
     }
+
     std::cout << "total count: " << total_count << std::endl;
     std::cout << "bad count: " << bad_cnt << std::endl;
     myfile.close();
-
 
     int sockfd, newsockfd, clilen;
     char buffer[256];
@@ -135,29 +136,25 @@ int main (int argc, char* argv[]) {
         // do I have a off-by-one error? big freaking deal, so what? wanna fight about it? @soheil
         int found_count = 0;
         for (int j = 0; j < total_count; j++) {
-          try {
-            num = lines[j];
-            x = inp ^ num;
+          num = lines[j];
+          x = inp ^ num;
 
-            x -= (x >> 1) & m1;             //put count of each 2 bits into those 2 bits
-            x = (x & m2) + ((x >> 2) & m2); //put count of each 4 bits into those 4 bits
-            x = (x + (x >> 4)) & m4;        //put count of each 8 bits into those 8 bits
-            bit_count = (x * h01)>>56;      //returns left 8 bits of x + (x<<8) + (x<<16) + (x<<24) + ...
+          x -= (x >> 1) & m1;             //put count of each 2 bits into those 2 bits
+          x = (x & m2) + ((x >> 2) & m2); //put count of each 4 bits into those 4 bits
+          x = (x + (x >> 4)) & m4;        //put count of each 8 bits into those 8 bits
+          bit_count = (x * h01)>>56;      //returns left 8 bits of x + (x<<8) + (x<<16) + (x<<24) + ...
 
-            if (bit_count < threshold) {
-              found_count++;
-              std::cout << j << ":" << num << std::endl;
-              char result[256];
-              sprintf(result, "%llu\n", num);
-              n = write(newsockfd, &result, strlen(result));
-              if (n < 0) {
-                perror("ERROR writing to socket");
-                exit(1);
-              }
-              if (found_count >= how_many_needed) break;
+          if (bit_count < threshold) {
+            found_count++;
+            std::cout << j << ":" << num << std::endl;
+            char result[256];
+            sprintf(result, "%llu\n", num);
+            n = write(newsockfd, &result, strlen(result));
+            if (n < 0) {
+              perror("ERROR writing to socket");
+              exit(1);
             }
-          } catch (...) {
-
+            if (found_count >= how_many_needed) break;
           }
         }
         exit(0);
