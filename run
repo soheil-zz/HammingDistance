@@ -1,0 +1,24 @@
+#!/bin/bash
+
+port=11500
+start=$(wc -l data|cut -d' ' -f1)
+while true; do
+	echo "count: $start port: $port"
+	prev_pid=$pid
+	./a.out $port data &
+	pid=$!
+	sleep 30
+	for i in $( sudo iptables -t nat --line-numbers -L | grep ^[0-9] | awk '{ print $1 }' | tac ); do sudo iptables -t nat -D PREROUTING $i; done
+	sudo iptables -t nat -A PREROUTING -p tcp --dport 11600 -j REDIRECT --to-port $port
+	echo "killing $prev_pid"
+	sudo kill -9 $prev_pid
+	sleep 86400
+	port=$((port+1))
+	echo "getting mysql dump"
+	mysql -u web -p'6YeB9GqPGbiRAgx6' -h'mega.ctfnledd13n5.us-west-1.rds.amazonaws.com' -e "select phash from web.image_phashes limit $start,10000000" > new_data
+	new=$(wc -l new_data|cut -d' ' -f1)
+	start=$((start+new))
+	cat data new_data > all
+	mv all data
+done
+
